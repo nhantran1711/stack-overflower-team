@@ -9,8 +9,10 @@ VOL_TARGET_LOOKBACK = 5 # fast read
 VOL_TARGET_REF = 60 # reference  vol level to target
 
 # instrument 0 gets a 10x larger position limit, but targeting the full 10x
+# consistently gets clipped by the $100k cap; 7.5x hits the cap on high-conviction
+# days while leaving room on lower-conviction ones
 posLimitMultiplier = np.ones(nInst)
-posLimitMultiplier[0] = 8.0
+posLimitMultiplier[0] = 7.5
 
 def getMyPosition(prcSoFar):
     nins, nt = prcSoFar.shape
@@ -46,9 +48,13 @@ def getMyPosition(prcSoFar):
     )
     riskAdj = signal / vol
 
-    # normalize riskAdj to have mean absolute value of 1
     riskAdj -= np.mean(riskAdj)
 
+    # cap extreme conviction so a few outlier scores don't hog dollar budget
+    # that would just get clipped by the per-instrument position limit anyway
+    riskAdj = np.clip(riskAdj, -1.5 * riskAdj.std(), 1.5 * riskAdj.std())
+
+    # normalize riskAdj to have mean absolute value of 1
     riskAdj /= (
         np.mean(np.abs(riskAdj)) + 1e-9
     )
