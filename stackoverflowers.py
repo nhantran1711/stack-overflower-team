@@ -1,18 +1,16 @@
 import numpy as np
 
 nInst = 51
-LOOKBACKS = [3, 5, 8, 13, 20]  # ensemble
+LOOKBACKS = [3, 5, 10, 20, 40]  # ensemble
 LOOKBACK_WEIGHTS = 1.0 / np.array(LOOKBACKS)  # favor shorter lookbacks
 WINSOR_PCT = 8  # clip extreme 
 
 VOL_TARGET_LOOKBACK = 5 # fast read
 VOL_TARGET_REF = 60 # reference  vol level to target
 
-# instrument 0 gets a 10x larger position limit, but targeting the full 10x
-# consistently gets clipped by the $100k cap; 7.5x hits the cap on high-conviction
-# days while leaving room on lower-conviction ones
+# instrument 0 gets a 10x larger position limit
 posLimitMultiplier = np.ones(nInst)
-posLimitMultiplier[0] = 7.5
+posLimitMultiplier[0] = 10.0
 
 def getMyPosition(prcSoFar):
     nins, nt = prcSoFar.shape
@@ -41,20 +39,16 @@ def getMyPosition(prcSoFar):
 
     signal = -np.average(zScores, axis = 0, weights = LOOKBACK_WEIGHTS)
 
-    # vol floor 
+    # vol floor
     vol = np.maximum(
         allRets[:, -maxLookback:].std(axis = 1),
         0.005
     )
     riskAdj = signal / vol
 
+    # normalize riskAdj to have mean absolute value of 1
     riskAdj -= np.mean(riskAdj)
 
-    # cap extreme conviction so a few outlier scores don't hog dollar budget
-    # that would just get clipped by the per-instrument position limit anyway
-    riskAdj = np.clip(riskAdj, -1.5 * riskAdj.std(), 1.5 * riskAdj.std())
-
-    # normalize riskAdj to have mean absolute value of 1
     riskAdj /= (
         np.mean(np.abs(riskAdj)) + 1e-9
     )
