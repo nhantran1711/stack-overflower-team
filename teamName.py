@@ -8,9 +8,9 @@ WINSOR_PCT = 8  # clip extreme
 VOL_TARGET_LOOKBACK = 5 # fast read
 VOL_TARGET_REF = 60 # reference  vol level to target
 
-# instrument 0 gets a 10x larger position limit
+# instrument 0 gets a 10x larger position limit, but targeting the full 10x
 posLimitMultiplier = np.ones(nInst)
-posLimitMultiplier[0] = 10.0
+posLimitMultiplier[0] = 8.0
 
 def getMyPosition(prcSoFar):
     nins, nt = prcSoFar.shape
