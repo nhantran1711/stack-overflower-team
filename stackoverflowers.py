@@ -8,13 +8,11 @@ WINSOR_PCT = 8  # clip extreme
 VOL_TARGET_LOOKBACK = 5  # fast read
 VOL_TARGET_REF = 60  # reference vol level to target
 
-DEADBAND = 0.20  # ignore target changes smaller than this fraction of the target
+DEADBAND = 0.2  # ignore target changes smaller than this fraction of the target
 
 posLimitMultiplier = np.ones(nInst)
 posLimitMultiplier[0] = 7.5
 
-# persistent state across calls: last position returned, and the nt it was returned at
-# (lets us detect a fresh backtest - nt not strictly growing - and reset)
 _state = {"pos": None, "lastNt": None}
 
 
