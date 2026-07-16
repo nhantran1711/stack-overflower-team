@@ -6,7 +6,8 @@ Participants: write getMyPosition(prcSoFar) in teamName.py and update the import
 
 import numpy as np
 import pandas as pd
-from stackoverflowers import getMyPosition as getPosition
+from stack_overflowers import getMyPosition as getPosition
+# from teamname1 import getMyPosition as getPosition
 
 nInst = 0
 nt = 0
